@@ -656,3 +656,31 @@ procdump(void)
     printf("\n");
   }
 }
+
+//sysinfo
+void
+procnum(uint64 *dst) {
+    *dst = 0;
+    struct proc *p;
+    for (p = proc; p < &proc[NPROC]; p++) {
+    	if (p->state != UNUSED) {
+	    (*dst)++;
+	}
+    }
+}
+
+unit64
+sys_sysinfo(void) {
+    struct sysinfo info;
+    freebytes(&info.freemem);
+    procnm(&info.nproc);
+
+    uint64 dstaddr;
+    argaddr(0, &dstaddr);
+
+    if (copout(myproc()->pagetable, dstaddr, (char *)&info, sizeof info) < 0) {
+    return -1;
+    }
+
+    return 0;
+}
